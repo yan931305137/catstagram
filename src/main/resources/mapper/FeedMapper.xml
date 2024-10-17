@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catstagram.mapper.FeedMapper">
+
+    <resultMap id="feedResultMap" type="com.catstagram.entity.Feed">
+        <id column="feed_idx" property="feed_idx"/> <!-- 动态的唯一标识符 -->
+        <result column="member_idx" property="member_idx"/> <!-- 发布动态的用户标识符 -->
+        <result column="feed_img" property="feed_img"/> <!-- 动态图片链接 -->
+        <result column="feed_content" property="feed_content"/> <!-- 动态内容 -->
+        <result column="feed_like_count" property="feed_like_count"/> <!-- 动态的点赞数量 -->
+        <result column="feed_date" property="feed_date"/> <!-- 动态发布日期 -->
+    </resultMap>
+
+    <resultMap id="mainFollowingFeedResultMap" type="com.catstagram.entity.MainFollowingFeed">
+        <id column="feed_idx" property="feed_idx"/> <!-- 动态的唯一标识符 -->
+        <result column="member_idx" property="member_idx"/> <!-- 用户的唯一标识符 -->
+        <result column="member_id" property="member_id"/> <!-- 用户ID -->
+        <result column="member_img" property="member_img"/> <!-- 用户头像图片链接 -->
+        <result column="feed_img" property="feed_img"/> <!-- 动态图片链接 -->
+        <result column="feed_content" property="feed_content"/> <!-- 动态内容 -->
+        <result column="feed_like_count" property="feed_like_count"/> <!-- 动态的点赞数量 -->
+        <result column="feed_date" property="feed_date"/> <!-- 动态发布日期和时间 -->
+        <result column="feed_date_minute" property="feed_date_minute"/> <!-- 动态的分钟数 -->
+        <result column="feed_date_time" property="feed_date_time"/> <!-- 动态的具体时间 -->
+
+        <!-- 动态评论列表映射 -->
+        <collection property="feed_comment_list" ofType="com.catstagram.entity.Comment">
+            <id column="comment_idx" property="comment_idx"/> <!-- 评论的唯一标识符 -->
+            <result column="comment_content" property="comment_content"/> <!-- 评论内容 -->
+        </collection>
+    </resultMap>
+
+    <!-- 获取主页面的关注者（我的朋友）和我发布的动态 -->
+    <select id="mainFollowingFeed" parameterType="Integer" resultMap="mainFollowingFeedResultMap">
+        WITH FollowedFeeds AS (
+        SELECT
+        m.member_idx, m.member_id, m.member_img,
+        fe.feed_idx, fe.feed_img, fe.feed_content, fe.feed_like_count, fe.feed_date,
+        TIMESTAMPDIFF(MINUTE, fe.feed_date, NOW()) AS feed_date_minute
+        FROM
+        catstagram_follow f
+        JOIN
+        catstagram_member m ON f.member_to = m.member_idx
+        JOIN
+        catstagram_feed fe ON f.member_to = fe.member_idx
+        WHERE
+        f.member_from = #{sidx}
+        AND fe.feed_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        ),
+        UserFeeds AS (
+        SELECT
+        m.member_idx, m.member_id, m.member_img,
+        fe.feed_idx, fe.feed_img, fe.feed_content, fe.feed_like_count, fe.feed_date,
+        TIMESTAMPDIFF(MINUTE, fe.feed_date, NOW()) AS feed_date_minute
+        FROM
+        catstagram_member m
+        JOIN
+        catstagram_feed fe ON m.member_idx = fe.member_idx
+        WHERE
+        m.member_idx = #{sidx}
+        AND fe.feed_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        )
+        SELECT * FROM FollowedFeeds
+        UNION
+        SELECT * FROM UserFeeds
+        ORDER BY feed_date DESC;
+    </select>
+
+    <!-- 发布动态 -->
+    <insert id="feedWrite" parameterType="com.catstagram.entity.Feed">
+        INSERT INTO catstagram_feed (member_idx, feed_img, feed_content, feed_like_count, feed_date)
+        VALUES (#{member_idx}, #{feed_img}, #{feed_content}, 0, NOW())
+    </insert>
+
+    <!-- 获取动态作者的索引（用于动态编辑页面） -->
+    <select id="feedMemberIdx" parameterType="Integer" resultType="Integer">
+        SELECT member_idx FROM catstagram_feed WHERE feed_idx = #{feed_idx}
+    </select>
+
+    <!-- 获取要修改的动态信息 -->
+    <select id="feedUpdateInfo" parameterType="Integer" resultMap="feedResultMap">
+        SELECT member_idx, feed_idx, feed_img, feed_content FROM catstagram_feed WHERE feed_idx = #{feed_idx}
+    </select>
+
+    <!-- 修改动态 -->
+    <update id="feedUpdate" parameterType="com.catstagram.entity.Feed">
+        UPDATE catstagram_feed
+        SET feed_content = #{feed_content}
+        WHERE feed_idx = #{feed_idx}
+    </update>
+
+    <!-- 删除动态 -->
+    <delete id="feedDel" parameterType="Integer">
+        DELETE FROM catstagram_feed WHERE feed_idx = #{feed_idx}
+    </delete>
+
+    <!-- 增加动态的点赞数 -->
+    <update id="feedLikeCountPlus" parameterType="Integer">
+        UPDATE catstagram_feed
+        SET feed_like_count = feed_like_count + 1
+        WHERE feed_idx = #{feed_idx}
+    </update>
+
+    <!-- 减少动态的点赞数 -->
+    <update id="feedLikeCountMinus" parameterType="Integer">
+        UPDATE catstagram_feed
+        SET feed_like_count = feed_like_count - 1
+        WHERE feed_idx = #{feed_idx}
+    </update>
+
+    <!-- 获取动态的点赞数 -->
+    <select id="feedLikeCount" parameterType="Integer" resultType="Integer">
+        SELECT feed_like_count FROM catstagram_feed WHERE feed_idx = #{feed_idx}
+    </select>
+
+    <!-- 获取Catstagram动态列表 -->
+    <select id="feedList" parameterType="Integer" resultMap="mainFollowingFeedResultMap">
+        SELECT
+        m.member_idx, m.member_id, m.member_img,
+        fe.feed_idx, fe.feed_img, fe.feed_content, fe.feed_like_count, fe.feed_date,
+        TIMESTAMPDIFF(MINUTE, fe.feed_date, NOW()) as feed_date_minute
+        FROM
+        catstagram_member m
+        JOIN catstagram_feed fe ON fe.member_idx = m.member_idx
+        WHERE
+        m.member_idx = #{member_idx}
+        ORDER BY
+        fe.feed_date DESC
+    </select>
+</mapper>

@@ -1,0 +1,8 @@
+@charset "UTF-8";
+.footer_div {
+	text-align: center;
+	font-size: 12px;
+	height: 80px;
+	margin: auto auto 0 auto;
+	color: #555555;
+}

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catstagram.mapper.MemberMapper">
+
+    <resultMap id="memberResultMap" type="com.catstagram.entity.Member">
+        <id property="member_idx" column="member_idx"/>
+        <result property="member_id" column="member_id"/>
+        <result property="member_name" column="member_name"/>
+        <result property="member_pwd" column="member_pwd"/>
+        <result property="member_email" column="member_email"/>
+        <result property="member_intro" column="member_intro"/>
+        <result property="member_img" column="member_img"/>
+        <result property="member_joindate" column="member_joindate"/>
+        <result property="member_quit" column="member_quit"/>
+        <result property="is_follow" column="is_follow"/>
+        <result property="feed_count" column="feed_count"/>
+        <result property="following_count" column="following_count"/>
+        <result property="follower_count" column="follower_count"/>
+        <result property="feed_count_KM" column="feed_count_KM"/>
+        <result property="following_count_KM" column="following_count_KM"/>
+        <result property="follower_count_KM" column="follower_count_KM"/>
+    </resultMap>
+
+    <!-- 检查用户ID是否重复 -->
+    <select id="idCheck" parameterType="String" resultType="String">
+        select member_id from catstagram_member where member_id = #{id}
+    </select>
+
+    <!-- 用户注册 -->
+    <insert id="signup" parameterType="com.catstagram.entity.Member">
+        insert into catstagram_member (member_id, member_name, member_pwd, member_intro, member_img, created_at,
+        member_quit)
+        values (#{member_id}, #{member_name}, #{member_pwd}, '', '', NOW(), 'n')
+    </insert>
+
+    <!-- 用户登录 -->
+    <select id="login" parameterType="String" resultMap="memberResultMap">
+        select
+        member_idx, member_id, member_name, member_pwd, member_email,
+        member_intro, member_img, member_joindate, member_quit, is_follow,
+        feed_count, following_count, follower_count, feed_count_KM,
+        following_count_KM, follower_count_KM
+        from catstagram_member
+        where member_id = #{id};
+    </select>
+
+    <!-- 获取会话信息 -->
+    <select id="sessionInfo" parameterType="String" resultMap="memberResultMap">
+        select member_idx, member_id, member_name, member_img from catstagram_member where member_id = #{id}
+    </select>
+
+    <!-- 搜索用户列表 -->
+    <select id="searchList" parameterType="Map" resultMap="memberResultMap">
+        SELECT
+        member_idx,
+        member_id,
+        member_name,
+        member_img,
+        (SELECT follow_idx
+        FROM catstagram_follow
+        WHERE member_to = member_idx AND member_from = #{sidx}) AS is_follow
+        FROM
+        catstagram_member
+        WHERE
+        member_id LIKE CONCAT('%', #{search_id}, '%') AND member_id != #{sid}
+        ORDER BY
+        IF(is_follow IS NULL, 1, 0), is_follow
+    </select>
+
+    <!-- 加载已保存的个人简介 -->
+    <select id="profileInfo" parameterType="Integer" resultType="String">
+        select member_intro from catstagram_member where member_idx = #{member_idx}
+    </select>
+
+    <!-- 修改个人简介 -->
+    <update id="profileUpdate" parameterType="com.catstagram.entity.Member">
+        update catstagram_member set member_intro = #{member_intro} where member_idx = #{member_idx}
+    </update>
+
+    <!-- 修改个人图片 -->
+    <update id="profileImgUpdate" parameterType="com.catstagram.entity.Member">
+        update catstagram_member set member_img = #{member_img} where member_idx = #{member_idx}
+    </update>
+
+    <!-- 修改会员信息 -->
+    <update id="infoUpdate" parameterType="com.catstagram.entity.Member">
+        update catstagram_member
+        set member_id = #{member_id}, member_name = #{member_name}
+        where member_idx = #{member_idx}
+    </update>
+
+    <!-- 确认密码（用于会员信息修改） -->
+    <select id="pwdChk" parameterType="Integer" resultType="String">
+        select member_pwd from catstagram_member where member_idx = #{sidx}
+    </select>
+
+    <!-- 修改密码 -->
+    <update id="pwdUpdateOk" parameterType="com.catstagram.entity.Member">
+        update catstagram_member set member_pwd = #{member_pwd} where member_idx = #{member_idx}
+    </update>
+
+    <!-- 会员退出 -->
+    <update id="quit" parameterType="Integer">
+        update catstagram_member set member_quit = 'y' where member_idx = #{sidx}
+    </update>
+
+    <!-- 获取关注者列表（关注我的人） -->
+    <select id="followerList" parameterType="Integer" resultMap="memberResultMap">
+        select
+        m.member_idx, m.member_id, m.member_name, m.member_img
+        from
+        catstagram_follow f, catstagram_member m
+        where
+        f.member_from = m.member_idx and f.member_to = #{sidx}
+    </select>
+
+    <!-- 获取关注列表（我关注的人） -->
+    <select id="followingList" parameterType="Integer" resultMap="memberResultMap">
+        select
+        m.member_idx, m.member_id, m.member_name, m.member_img
+        from
+        catstagram_follow f, catstagram_member m
+        where
+        f.member_to = m.member_idx and f.member_from = #{sidx}
+    </select>
+
+    <!-- 查询会员的Catstagram地址及其他信息 -->
+    <select id="urlIdxIdSelect" resultMap="memberResultMap" parameterType="Map">
+        select
+        m.member_idx, m.member_id, m.member_name, m.member_intro, m.member_img,
+        (select count(*) from catstagram_feed where member_idx = m.member_idx) feed_count,
+        (select count(*) from catstagram_follow where member_from = m.member_idx) following_count,
+        (select count(*) from catstagram_follow where member_to = m.member_idx) follower_count,
+        (select follow_idx from catstagram_follow where member_to = m.member_idx and member_from = #{sidx}) is_follow
+        from
+        catstagram_member m
+        where
+        m.member_id = #{member_id}
+    </select>
+
+    <!-- 查询会员的关注者和关注列表 -->
+    <select id="followListOtherInfo" resultMap="memberResultMap" parameterType="String">
+        select member_idx, member_id from catstagram_member where member_id = #{member_id}
+    </select>
+
+    <!-- 查询其他会员的关注者列表 -->
+    <select id="otherFollowerList" resultMap="memberResultMap" parameterType="Map">
+        select
+        m.member_idx, m.member_id, m.member_name, m.member_img,
+        (select follow_idx from catstagram_follow where member_to = member_idx and member_from = #{sidx}) is_follow
+        from
+        catstagram_follow f, catstagram_member m
+        where
+        f.member_from = m.member_idx and f.member_to = #{member_idx}
+        order by
+        case when m.member_idx = #{sidx} then 0 else 1 end, is_follow nulls last
+    </select>
+
+    <!-- 查询其他会员的关注列表 -->
+    <select id="otherFollowingList" resultMap="memberResultMap" parameterType="Map">
+        select
+        m.member_idx, m.member_id, m.member_name, m.member_img,
+        (select follow_idx from catstagram_follow where member_to = member_idx and member_from = #{sidx}) is_follow
+        from
+        catstagram_follow f, catstagram_member m
+        where
+        f.member_to = m.member_idx and f.member_from = #{member_idx}
+        order by
+        case when m.member_idx = #{sidx} then 0 else 1 end, is_follow nulls last
+    </select>
+
+    <!-- 获取Header的通知列表 -->
+	<select id="alarmList" parameterType="Integer" resultType="com.catstagram.entity.Alarm">
+		SELECT * FROM (
+		SELECT
+		'follow' AS activity_type,
+		m.member_id,
+		f.follow_idx,
+		NULL AS feed_idx,
+		NULL AS feed_img,
+		NULL AS feed_like_idx,
+		NULL AS comment_idx,
+		NULL AS comment_content,
+		NULL AS comment_like_idx,
+		f.follow_date AS alarm_date,
+		FLOOR((NOW() - f.follow_date) * 24 * 60) AS alarm_date_minute
+		FROM
+		catstagram_member m,
+		catstagram_follow f
+		WHERE
+		f.member_to = #{sidx}
+		AND m.member_idx = f.member_from
+
+		UNION ALL
+
+		SELECT
+		'feedLike' AS activity_type,
+		m.member_id,
+		NULL AS follow_idx,
+		fe.feed_idx,
+		fe.feed_img,
+		fl.feed_like_idx,
+		NULL AS comment_idx,
+		NULL AS comment_content,
+		NULL AS comment_like_idx,
+		fl.feed_like_date AS alarm_date,
+		FLOOR((NOW() - fl.feed_like_date) * 24 * 60) AS alarm_date_minute
+		FROM
+		catstagram_member m,
+		catstagram_feed fe,
+		catstagram_feed_like fl
+		WHERE
+		fe.member_idx = #{sidx}
+		AND m.member_idx = fl.member_idx
+		AND fe.feed_idx = fl.feed_idx
+		AND fl.member_idx != #{sidx}
+
+		UNION ALL
+
+		SELECT
+		'comment' AS activity_type,
+		m.member_id,
+		NULL AS follow_idx,
+		fe.feed_idx,
+		fe.feed_img,
+		NULL AS feed_like_idx,
+		c.comment_idx,
+		c.comment_content,
+		NULL AS comment_like_idx,
+		c.comment_date AS alarm_date,
+		FLOOR((NOW() - c.comment_date) * 24 * 60) AS alarm_date_minute
+		FROM
+		catstagram_member m,
+		catstagram_feed fe,
+		catstagram_comment c
+		WHERE
+		fe.member_idx = #{sidx}
+		AND m.member_idx = c.member_idx
+		AND fe.feed_idx = c.feed_idx
+		AND c.member_idx != #{sidx}
+
+		UNION ALL
+
+		SELECT
+		'commentLike' AS activity_type,
+		m.member_id,
+		NULL AS follow_idx,
+		fe.feed_idx,
+		fe.feed_img,
+		NULL AS feed_like_idx,
+		c.comment_idx,
+		c.comment_content,
+		cl.comment_like_idx,
+		cl.comment_like_date AS alarm_date,
+		FLOOR((NOW() - cl.comment_like_date) * 24 * 60) AS alarm_date_minute
+		FROM
+		catstagram_member m,
+		catstagram_feed fe,
+		catstagram_comment c,
+		catstagram_comment_like cl
+		WHERE
+		m.member_idx = cl.member_idx
+		AND c.feed_idx = fe.feed_idx
+		AND cl.member_idx != #{sidx}
+		AND c.member_idx = #{sidx}
+		AND cl.member_idx = m.member_idx
+		AND c.comment_idx = cl.comment_idx
+		) AS alarms
+		LIMIT 40
+	</select>
+
+	<!-- 获取我查看过的通知中最后一个通知的时间 -->
+    <select id="lastAlarmTime" parameterType="Integer" resultType="java.util.Date">
+        select member_last_alarm_time from catstagram_member where member_idx = #{sidx}
+    </select>
+
+    <!-- 将最后一个通知的时间保存到数据库 -->
+    <update id="lastAlarmSave" parameterType="map">
+        update catstagram_member set member_last_alarm_time = #{lastTime} where member_idx = #{sidx}
+    </update>
+</mapper>

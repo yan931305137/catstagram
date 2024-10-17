@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catstagram.mapper.CommentMapper">
+
+	<resultMap id="CommentResultMap" type="com.catstagram.entity.Comment">
+		<id property="comment_idx" column="comment_idx"/>
+		<result property="feed_idx" column="feed_idx"/>
+		<result property="member_idx" column="member_idx"/>
+		<result property="comment_content" column="comment_content"/>
+		<result property="comment_like_count" column="comment_like_count"/>
+		<result property="comment_date" column="comment_date"/>
+		<result property="member_id" column="member_id"/>
+		<result property="member_img" column="member_img"/>
+		<result property="comment_date_minute" column="comment_date_minute"/>
+		<result property="comment_date_time" column="comment_date_time"/>
+		<result property="comment_like_idx" column="comment_like_idx"/>
+	</resultMap>
+
+	<!-- 帖子评论列表 -->
+	<select id="feedCommentList" parameterType="Integer" resultMap="CommentResultMap">
+		select
+		c.comment_idx, c.feed_idx, c.member_idx, c.comment_content,
+		c.comment_like_count, c.comment_date, m.member_id, m.member_img,
+		FLOOR(TIMESTAMPDIFF(MINUTE, c.comment_date, NOW())) as comment_date_minute
+		from
+		catstagram_comment c, catstagram_member m
+		where
+		c.member_idx = m.member_idx and feed_idx = #{feed_idx}
+		order by
+		c.comment_date asc
+	</select>
+
+	<!-- 帖子评论撰写 -->
+	<insert id="feedCommentInsert" parameterType="com.catstagram.entity.Comment">
+		insert into
+			catstagram_comment (feed_idx, member_idx,comment_content, comment_like_count, comment_date)
+		values
+			(#{feed_idx}, #{member_idx}, #{comment_content}, 0, NOW())
+	</insert>
+	
+	<!-- 帖子评论删除 -->
+	<delete id="feedCommentDel" parameterType="Integer">
+		delete from catstagram_comment where comment_idx = #{comment_idx}
+	</delete>
+	
+	<!-- 帖子评论点赞数增加 -->
+	<update id="feedCommentLikeCountPlus" parameterType="Integer">
+		update catstagram_comment
+		set comment_like_count = comment_like_count + 1
+		where comment_idx = #{comment_idx}
+	</update>
+	
+	<!-- 帖子评论点赞数减少 -->
+	<update id="feedCommentLikeCountMinus" parameterType="Integer">
+		update catstagram_comment
+		set comment_like_count = comment_like_count - 1
+		where comment_idx = #{comment_idx}
+	</update>
+	
+	<!-- 帖子评论点赞数 -->
+	<select id="feedCommentLikeCount" parameterType="Integer" resultType="Integer">
+		select comment_like_count from catstagram_comment where comment_idx = #{comment_idx}
+	</select>
+</mapper>

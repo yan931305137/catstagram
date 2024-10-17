@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catstagram.mapper.FollowMapper">
+    <!-- 添加关注（添加好友） -->
+    <insert id="following" parameterType="com.catstagram.entity.Follow">
+        INSERT INTO
+        catstagram_follow (member_from, member_to, follow_date)
+        VALUES
+        (#{member_from}, #{member_to}, NOW())
+    </insert>
+
+    <!-- 取消关注（删除好友） -->
+    <delete id="cancelFollowing" parameterType="com.catstagram.entity.Follow">
+        DELETE FROM catstagram_follow
+        WHERE member_from = #{member_from} AND member_to = #{member_to}
+    </delete>
+
+    <!-- 从关注者列表中删除关注我的人（删除好友） -->
+    <delete id="delFollower" parameterType="map">
+        DELETE FROM catstagram_follow WHERE member_from = #{member_from} AND member_to = #{member_to}
+    </delete>
+
+    <!-- 推荐关注（推荐好友，最多100人） -->
+    <select id="suggestedFollows" parameterType="Integer" resultType="com.catstagram.entity.Follow">
+        SELECT * FROM (
+        SELECT
+        m.member_idx AS following_idx_of_my_following,
+        m.member_id AS following_id_of_my_following,
+        m.member_name AS following_name_of_my_following,
+        m.member_img AS following_img_of_my_following,
+        COUNT(CASE WHEN m2.member_id IN (
+        SELECT m.member_id
+        FROM catstagram_member m
+        JOIN catstagram_follow f ON m.member_idx = f.member_to
+        WHERE f.member_from = #{sidx}
+        ) THEN 1 ELSE NULL END) - 1 AS num_of_followers,
+        GROUP_CONCAT(CASE WHEN m2.member_id IN (
+        SELECT m.member_id
+        FROM catstagram_member m
+        JOIN catstagram_follow f ON m.member_idx = f.member_to
+        WHERE f.member_from = #{sidx}
+        ) THEN m2.member_id ELSE NULL END ORDER BY m2.member_id) AS my_following_list
+        FROM
+        catstagram_member m
+        JOIN
+        catstagram_follow f ON f.member_to = m.member_idx
+        JOIN
+        catstagram_member m2 ON m2.member_idx = f.member_from
+        WHERE
+        m.member_id IN (
+        SELECT DISTINCT m2.member_id AS my_following_following_id
+        FROM catstagram_member m
+        JOIN catstagram_follow f ON f.member_to = m.member_idx
+        JOIN catstagram_member m2 ON m2.member_idx = f.member_from
+        WHERE f.member_from = #{sidx}
+        AND m2.member_idx != #{sidx}
+        AND m2.member_idx NOT IN (
+        SELECT m.member_idx
+        FROM catstagram_member m
+        JOIN catstagram_follow f ON f.member_to = m.member_idx
+        WHERE f.member_from = #{sidx}
+        )
+        )
+        GROUP BY
+        m.member_idx,
+        m.member_id,
+        m.member_name,
+        m.member_img
+        ORDER BY
+        RAND()
+        ) AS suggested_follows
+        LIMIT 100;
+    </select>
+
+    <!-- 随机推荐3个关注者（在主页随机推荐3个好友） -->
+	<select id="suggestedFollowersInMain" parameterType="Integer" resultType="com.catstagram.entity.Follow">
+		SELECT * FROM (
+		SELECT
+		m.member_idx AS following_idx_of_my_following,
+		m.member_id AS following_id_of_my_following,
+		m.member_name AS following_name_of_my_following,
+		m.member_img AS following_img_of_my_following,
+		COUNT(CASE
+		WHEN m2.member_id IN (
+		SELECT m.member_id
+		FROM catstagram_member m
+		JOIN catstagram_follow f ON m.member_idx = f.member_to
+		WHERE f.member_from = #{sidx}
+		) THEN 1
+		ELSE NULL
+		END) - 1 AS num_of_followers,
+		GROUP_CONCAT(CASE
+		WHEN m2.member_id IN (
+		SELECT m.member_id
+		FROM catstagram_member m
+		JOIN catstagram_follow f ON m.member_idx = f.member_to
+		WHERE f.member_from = #{sidx}
+		) THEN m2.member_id
+		ELSE NULL
+		END ORDER BY m2.member_id) AS my_following_list
+		FROM
+		catstagram_member m
+		JOIN
+		catstagram_follow f ON f.member_to = m.member_idx
+		JOIN
+		catstagram_follow f2 ON f2.member_from = m.member_idx  <!-- Ensure this line is correctly placed -->
+		JOIN
+		catstagram_member m2 ON m2.member_idx = f2.member_to
+		WHERE
+		m.member_id IN (
+		SELECT DISTINCT m2.member_id AS my_following_following_id
+		FROM catstagram_member m
+		JOIN catstagram_follow f ON f.member_to = m.member_idx
+		JOIN catstagram_follow f2 ON f2.member_from = m.member_idx
+		JOIN catstagram_member m2 ON m2.member_idx = f2.member_to
+		WHERE f.member_from = #{sidx}
+		AND f2.member_to != #{sidx}
+		AND f2.member_to NOT IN (
+		SELECT m.member_idx
+		FROM catstagram_member m
+		JOIN catstagram_follow f ON f.member_to = m.member_idx
+		WHERE f.member_from = #{sidx}
+		)
+		)
+		GROUP BY
+		m.member_idx,
+		m.member_id,
+		m.member_name,
+		m.member_img
+		ORDER BY
+		RAND()
+		) AS suggestions
+		LIMIT 3
+	</select>
+
+	<!-- 获取其他会员的关注者数量（用于查看我关注该会员后的变化） -->
+    <select id="otherFollowerCount" parameterType="Integer" resultType="Integer">
+        select count(*) from catstagram_follow where member_to = #{sidx}
+    </select>
+
+    <!-- 查看该会员被我的哪些关注者关注 -->
+    <select id="whoFollow" parameterType="Map" resultType="com.catstagram.entity.Follow">
+        select
+        m.member_idx as following_idx_of_my_following,
+        m.member_id as following_id_of_my_following,
+        m.member_name as following_name_of_my_following,
+        m.member_img as following_img_of_my_following,
+        count(case when m2.member_id in
+        (select m.member_id from catstagram_member m, catstagram_follow f where m.member_idx = f.member_to and
+        f.member_from = #{sidx})
+        then 1 else null end) - 1 as num_of_followers,
+        GROUP_CONCAT(
+        case when m2.member_id in
+        (select m.member_id from catstagram_member m, catstagram_follow f where m.member_idx = f.member_to and
+        f.member_from = #{sidx})
+        then m2.member_id else null end order by m2.member_id
+        ) as my_following_list
+        from
+        catstagram_member m
+        join
+        catstagram_follow f on f.member_to = m.member_idx
+        join
+        catstagram_member m2 on m2.member_idx = f.member_from
+        where
+        m.member_idx = #{member_idx}
+        group by
+        m.member_idx,
+        m.member_id,
+        m.member_name,
+        m.member_img
+    </select>
+</mapper>

@@ -1,0 +1,112 @@
+@charset "UTF-8";
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.search_result_div {
+    margin: 120px auto;
+    width: 1100px;
+    margin-bottom: 60px;
+    cursor: default;
+    flex: 1;
+}
+
+.search_msg_div {
+    text-align: center;
+    color: #555555;
+}
+
+.search_list_div {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    height: 50px;
+    width: 100%; /* 전체 너비를 활용 */
+    max-width: 680px;
+    margin-left: 210px;
+}
+
+.img_and_id_and_name_div {
+    width: 600px;
+    float: left;
+}
+
+.search_profile_img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.id_and_name_div {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 10px;
+    padding-top: 1px;
+}
+
+.search_list_id {
+    text-decoration: none;
+    color: #555555;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.search_list_name {
+    text-decoration: none;
+    color: #555555;
+    font-size: 13px;
+}
+
+.search_list_follow_btn_div {
+    width: 80px;
+    float: right;
+}
+
+.search_list_follow_btn {
+    border: none;
+	border-radius: 5px;
+	background: #458eff;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    width: 80px;
+    line-height: 15px;
+}
+
+.scroll_to_top_btn {
+    position: fixed;
+    bottom: 40px;
+    right: 50px;
+    width: 50px;
+    height: 50px;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.follow_list_del_btn {
+    margin-left: auto;
+    border: none;
+	border-radius: 5px;
+	background: #d9d9d9;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    width: 80px;
+    line-height: 15px;
+    color: #555555;
+}
+
+.suggestedFollowList {
+	cursor: pointer;
+}
+
+.first_following {
+	text-decoration: none;
+	color: #555555;
+	font-size: 12px;
+}
