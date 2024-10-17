@@ -7,14 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-@Api(tags = "登出管理")
 @Controller
 public class LogoutController {
 	
-	@ApiOperation(value = "登出", notes = "用户登出并重定向到登录页面")
 	@GetMapping("/catstagram/account/logout")
 	public ModelAndView logout(HttpServletRequest req) {
 		HttpSession session = req.getSession();

@@ -14,7 +14,7 @@ import lombok.*;
 public class Comment implements Serializable {
 	// 评论的唯一标识符（索引）
 	@TableId
-	private Integer comment_idx;
+	private int comment_idx;
 	// 与评论相关联的动态的唯一标识符（索引）
 	private int feed_idx;
 	// 发表评论的用户的唯一标识符（索引）

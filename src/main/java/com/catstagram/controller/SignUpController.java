@@ -14,18 +14,17 @@ import com.catstagram.utils.encryption.Encryption;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 @Controller
-@Api(tags = "注册控制器")
 public class SignUpController {
 	
 	@Autowired
 	private MemberService memberService;
 	
-	@ApiOperation(value = "跳转到注册页面", notes = "跳转到注册页面，如果已登录则提示注销后才能访问")
+	/**
+	 * 跳转到注册页面，如果已登录则提示注销后才能访问
+	 * @param session HttpSession对象
+	 * @return ModelAndView视图模型
+	 */
 	@GetMapping("/catstagram/account/signup")
 	public ModelAndView signUp(HttpSession session) {
 		Integer sidx = (Integer)session.getAttribute("sidx");
@@ -40,10 +39,14 @@ public class SignUpController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "检查ID是否重复", notes = "通过POST请求检查ID是否重复")
+	/**
+	 * 通过POST请求检查ID是否重复
+	 * @param id 用户ID
+	 * @return 检查结果
+	 */
 	@ResponseBody
 	@PostMapping("/catstagram/account/idCheck")
-	public String idCheck(@ApiParam(value = "用户ID", required = true) @RequestParam("id") String id) {
+	public String idCheck(@RequestParam("id") String id) {
 		String member_id = null;
 		try {
 			member_id = memberService.idCheck(id);
@@ -54,7 +57,11 @@ public class SignUpController {
 		return member_id;
 	}
 	
-	@ApiOperation(value = "非法访问提示", notes = "通过GET请求访问ID检查时提示非法访问")
+	/**
+	 * 通过GET请求访问ID检查时提示非法访问
+	 * @param session HttpSession对象
+	 * @return ModelAndView视图模型
+	 */
 	@GetMapping("/catstagram/account/idCheck")
 	public ModelAndView idCheckGet(HttpSession session) {
 		ModelAndView mav = new ModelAndView();
@@ -64,9 +71,13 @@ public class SignUpController {
 		return mav;
 	}
 
-	@ApiOperation(value = "注册", notes = "通过POST请求进行注册，密码会被加密")
+	/**
+	 * 通过POST请求进行注册，密码会被加密
+	 * @param dto 用户信息对象
+	 * @return ModelAndView视图模型
+	 */
 	@PostMapping("/catstagram/account/signup")
-	public ModelAndView signup(@ApiParam(value = "用户信息", required = true) Member dto) {
+	public ModelAndView signup(Member dto) {
 		dto.setMember_pwd(Encryption.sha256(dto.getMember_pwd())); // 密码加密
 		int result = 0;
 		try {

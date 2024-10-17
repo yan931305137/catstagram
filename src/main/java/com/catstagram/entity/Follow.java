@@ -14,7 +14,7 @@ import lombok.*;
 public class Follow implements Serializable {
 	// 关注的唯一标识符（索引）
 	@TableId
-	private Integer follow_idx;
+	private int follow_idx;
 	// 发起关注的用户的唯一标识符（索引）
 	private int member_from;
 	// 被关注的用户的唯一标识符（索引）

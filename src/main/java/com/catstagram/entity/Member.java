@@ -14,7 +14,7 @@ import lombok.*;
 public class Member implements Serializable {
 	// 用户的唯一标识符（索引）
 	@TableId
-	private Integer member_idx;
+	private int member_idx;
 	// 用户ID
 	private String member_id;
 	// 用户名

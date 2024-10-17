@@ -14,7 +14,7 @@ import lombok.*;
 public class Feed implements Serializable {
 	// 动态的唯一标识符（索引）
 	@TableId
-	private Integer feed_idx;
+	private int feed_idx;
 	// 发布动态的用户的唯一标识符（索引）
 	private int member_idx;
 	// 动态图片链接

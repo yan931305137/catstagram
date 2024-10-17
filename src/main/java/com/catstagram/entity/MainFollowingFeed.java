@@ -21,7 +21,7 @@ public class MainFollowingFeed implements Serializable {
 	private String member_img;
 	// 动态的唯一标识符（索引）
 	@TableId
-	private Integer feed_idx;
+	private int feed_idx;
 	// 动态图片链接
 	private String feed_img;
 	// 动态内容

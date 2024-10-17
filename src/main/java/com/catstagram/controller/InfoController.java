@@ -18,18 +18,12 @@ import com.catstagram.entity.Alarm;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 @Controller
-@Api(tags = "会员信息管理")
 public class InfoController {
 	
 	@Autowired
 	private MemberService memberService;
 	
-	@ApiOperation(value = "会员信息修改页面", notes = "显示会员信息修改页面")
 	@GetMapping("catstagram/account/infoUpdate")
 	public ModelAndView infoUpdateForm(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -70,12 +64,21 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "会员信息修改", notes = "提交会员信息修改请求")
 	@PostMapping("/catstagram/account/infoUpdate")
-	public ModelAndView infoUpdate(@ApiParam(value = "会员信息", required = true) Member dto, HttpSession session) {
+	public ModelAndView infoUpdate(
+			@RequestParam("member_id") String member_id,
+			@RequestParam("member_name") String member_name,
+			@RequestParam("member_email") String member_email,
+			HttpSession session)
+	{
 		int sidx = (Integer)session.getAttribute("sidx");
 		
+		Member dto = new Member();
 		dto.setMember_idx(sidx);
+		dto.setMember_id(member_id);
+		dto.setMember_name(member_name);
+		dto.setMember_email(member_email);
+
 		int result = 0;
 		try {
 			result = memberService.infoUpdate(dto);
@@ -96,9 +99,8 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "密码确认页面（密码修改）", notes = "显示密码确认页面以进行密码修改")
 	@GetMapping("/catstagram/account/pwdUpdate")
-	public ModelAndView pwdChkFormForPwdUpdate(@ApiParam(value = "页面标识", required = false) @RequestParam(value = "page", defaultValue = "") String page,
+	public ModelAndView pwdChkFormForPwdUpdate(@RequestParam(value = "page", defaultValue = "") String page,
 								   HttpSession session) {
 		Integer sidx = (Integer)session.getAttribute("sidx");
 		ModelAndView mav = new ModelAndView();
@@ -139,9 +141,8 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "密码确认页面（会员退出）", notes = "显示密码确认页面以进行会员退出")
 	@GetMapping("/catstagram/account/quit")
-	public ModelAndView pwdChkFormForQuit(@ApiParam(value = "页面标识", required = false) @RequestParam(value = "page", defaultValue = "") String page,
+	public ModelAndView pwdChkFormForQuit(@RequestParam(value = "page", defaultValue = "") String page,
 								   HttpSession session) {
 		Integer sidx = (Integer)session.getAttribute("sidx");
 		ModelAndView mav = new ModelAndView();
@@ -182,10 +183,9 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "密码确认", notes = "确认密码以进行后续操作")
 	@PostMapping({"/catstagram/account/pwdUpdate", "/catstagram/account/quit"})
-	public ModelAndView pwdChk(@ApiParam(value = "页面标识", required = false) @RequestParam(value = "page", defaultValue = "") String page,
-						 	   @ApiParam(value = "会员密码", required = true) @RequestParam("member_pwd") String member_pwd, HttpSession session) {
+	public ModelAndView pwdChk(@RequestParam(value = "page", defaultValue = "") String page,
+						 	   @RequestParam("member_pwd") String member_pwd, HttpSession session) {
 		Integer sidx = (Integer)session.getAttribute("sidx");
 		ModelAndView mav = new ModelAndView();
 		String dbPwd = null;
@@ -239,9 +239,8 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "密码修改", notes = "提交密码修改请求")
 	@PostMapping("/catstagram/account/pwdUpdateOk")
-	public ModelAndView pwdUpdateOk(@ApiParam(value = "会员密码", required = true) @RequestParam("member_pwd") String pwd, HttpSession session) {
+	public ModelAndView pwdUpdateOk(@RequestParam("member_pwd") String pwd, HttpSession session) {
 		int sidx = (Integer)session.getAttribute("sidx");
 		Member dto = new Member();
 		dto.setMember_pwd(Encryption.sha256(pwd));
@@ -260,7 +259,6 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "密码修改页面（GET）", notes = "显示错误的访问信息")
 	@GetMapping("/catstagram/account/pwdUpdateOk")
 	public ModelAndView pwdUpdateOkGet() {
 		ModelAndView mav = new ModelAndView();
@@ -270,7 +268,6 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "会员退出", notes = "提交会员退出请求")
 	@PostMapping("/catstagram/account/quitOk")
 	public ModelAndView quitOk(HttpSession session, HttpServletResponse resp) {
 		int sidx = (Integer)session.getAttribute("sidx");
@@ -312,7 +309,6 @@ public class InfoController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "会员退出页面（GET）", notes = "显示错误的访问信息")
 	@GetMapping("/catstagram/account/quitOk")
 	public ModelAndView quitOkGet() {
 		ModelAndView mav = new ModelAndView();

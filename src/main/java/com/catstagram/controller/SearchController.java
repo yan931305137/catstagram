@@ -13,21 +13,15 @@ import com.catstagram.entity.Alarm;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 @Controller
-@Api(tags = "搜索控制器")
 public class SearchController {
 	
 	@Autowired
 	private MemberService memberService;
 	
-	@ApiOperation(value = "通过会员ID搜索", notes = "根据提供的会员ID进行搜索")
 	@GetMapping("/catstagram/account/search")
 	public ModelAndView search(
-			@ApiParam(value = "搜索的会员ID", required = false) @RequestParam(value = "id", defaultValue = "") String search_id, 
+			@RequestParam(value = "id", defaultValue = "") String search_id, 
 			HttpSession session) {
 		String sid = (String)session.getAttribute("sid");
 		Integer sidx = (Integer)session.getAttribute("sidx");

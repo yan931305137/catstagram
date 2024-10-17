@@ -20,11 +20,6 @@ import com.catstagram.service.FollowService;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-@Api(tags = "关注管理")
 @Controller
 public class FollowController {
 	
@@ -34,10 +29,9 @@ public class FollowController {
 	@Autowired
 	private MemberService memberService;
 	
-	@ApiOperation(value = "关注(添加好友)", notes = "关注指定用户")
 	@ResponseBody
 	@PostMapping("/catstagram/account/following")
-	public int following(@ApiParam(value = "被关注者ID", required = true) @RequestParam("to") int to, HttpSession session) {
+	public int following(@RequestParam("to") int to, HttpSession session) {
 		Follow dto = new Follow();
 		int sidx = (Integer)session.getAttribute("sidx");
 		dto.setMember_from(sidx);
@@ -52,10 +46,9 @@ public class FollowController {
 		return to;
 	}
 	
-	@ApiOperation(value = "取消关注(删除好友)", notes = "取消关注指定用户")
 	@ResponseBody
 	@PostMapping("/catstagram/account/cancelFollowing")
-	public int cancelFollowing(@ApiParam(value = "被取消关注者ID", required = true) @RequestParam("to") int to, HttpSession session) {
+	public int cancelFollowing(@RequestParam("to") int to, HttpSession session) {
 		Follow dto = new Follow();
 		int sidx = (Integer)session.getAttribute("sidx");
 		dto.setMember_from(sidx);
@@ -70,7 +63,6 @@ public class FollowController {
 		return to;
 	}
 	
-	@ApiOperation(value = "关注者列表页面(添加我的人)", notes = "显示关注者列表页面")
 	@GetMapping("/catstagram/account/follower")
 	public ModelAndView followerForm(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -119,9 +111,8 @@ public class FollowController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "从关注者列表中删除关注我的人", notes = "删除指定关注者")
 	@PostMapping("/catstagram/account/delFollower")
-	public String delFollower(@ApiParam(value = "被删除关注者ID", required = true) @RequestParam("to") int member_idx, HttpSession session) {
+	public String delFollower(@RequestParam("to") int member_idx, HttpSession session) {
 		int sidx = (Integer)session.getAttribute("sidx");
 		try {
 			followService.delFollower(member_idx, sidx);
@@ -131,7 +122,6 @@ public class FollowController {
 		return "follower";
 	}
 	
-	@ApiOperation(value = "关注列表页面(我关注的人)", notes = "显示关注列表页面")
 	@GetMapping("/catstagram/account/following")
 	public ModelAndView followingForm(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -180,7 +170,6 @@ public class FollowController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "推荐关注页面", notes = "显示推荐关注页面")
 	@GetMapping("/catstagram/account/suggestedFollows")
 	public ModelAndView suggestedFollows(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -235,9 +224,8 @@ public class FollowController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "其他人的关注者列表页面", notes = "显示其他用户的关注者列表页面")
 	@GetMapping("/catstagram/{member_id}/follower")
-	public ModelAndView followerOther(@ApiParam(value = "用户ID", required = true) @PathVariable String member_id, HttpSession session) {
+	public ModelAndView followerOther(@PathVariable String member_id, HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
 		String sid = (String)session.getAttribute("sid");
 		ModelAndView mav = new ModelAndView();
@@ -255,7 +243,7 @@ public class FollowController {
 			} else {
 				int sidx = (Integer)session.getAttribute("sidx");
 				List<Member> list = null;
-				try {
+			 try {
 					list = memberService.otherFollowerList(dto.getMember_idx(), sidx);
 					
 				} catch (Exception e) {
@@ -301,9 +289,8 @@ public class FollowController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "其他人的关注列表页面", notes = "显示其他用户的关注列表页面")
 	@GetMapping("/catstagram/{member_id}/following")
-	public ModelAndView followingOther(@ApiParam(value = "用户ID", required = true) @PathVariable String member_id, HttpSession session) {
+	public ModelAndView followingOther(@PathVariable String member_id, HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
 		String sid = (String)session.getAttribute("sid");
 		ModelAndView mav = new ModelAndView();
@@ -365,10 +352,9 @@ public class FollowController {
 		
 		return mav;
 	}
-	@ApiOperation(value = "在其他会员的Catstagram上关注", notes = "返回关注者增减数")
 	@ResponseBody
 	@PostMapping("/catstagram/account/followingCount")
-	public Map<String, Object> followingCount(@ApiParam(value = "被关注者ID", required = true) @RequestParam("to") int to, HttpSession session) {
+	public Map<String, Object> followingCount(@RequestParam("to") int to, HttpSession session) {
 		Map<String, Object> resp = new HashMap<String, Object>();
 		Follow dto = new Follow();
 		DecimalFormat df = new DecimalFormat("#,#");
@@ -397,17 +383,15 @@ public class FollowController {
 		return resp;
 	}
 	
-	@ApiOperation(value = "在其他会员的Catstagram上取消关注", notes = "返回关注者增减数")
 	@ResponseBody
 	@PostMapping("/catstagram/account/cancelFollowingCount")
-	public Map<String, Object> cancelFollowingCount(@ApiParam(value = "被取消关注者ID", required = true) @RequestParam("to") int to, HttpSession session) {
+	public Map<String, Object> cancelFollowingCount(@RequestParam("to") int to, HttpSession session) {
 		Map<String, Object> resp = new HashMap<String, Object>();
 		Follow dto = new Follow();
 		DecimalFormat df = new DecimalFormat("#,#");
 		int sidx = (Integer)session.getAttribute("sidx");
 		dto.setMember_from(sidx);
 		dto.setMember_to(to);
-
 		int followerCount = 0;
 		String followerCount_s = null;
 		try {

@@ -15,10 +15,7 @@ import com.catstagram.service.CommentService;
 import com.catstagram.entity.CommentLike;
 import com.catstagram.service.CommentLikeService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-@Api(tags = "评论管理")
+// 评论管理控制器
 @Controller
 public class CommentController {
 
@@ -28,7 +25,7 @@ public class CommentController {
     @Autowired
     private CommentLikeService commentLikeService;
 
-    @ApiOperation(value = "发表帖子评论")
+    // 发表帖子评论
     @ResponseBody
     @PostMapping("/catstagram/account/feedCommentInsert")
     public List<Comment> feedCommentInsert(@RequestParam("feed_idx") int feed_idx,
@@ -81,7 +78,7 @@ public class CommentController {
         return list;
     }
 
-    @ApiOperation(value = "删除帖子评论")
+    // 删除帖子评论
     @PostMapping("/catstagram/account/feedCommentDel")
     public String feedCommentDel(@RequestParam("comment_idx") int comment_idx) {
         try {
@@ -93,7 +90,7 @@ public class CommentController {
         return "main";
     }
 
-    @ApiOperation(value = "点赞帖子评论")
+    // 点赞帖子评论
     @ResponseBody
     @PostMapping("/catstagram/account/likeFeedComment")
     public int likeFeedComment(@RequestParam("comment_idx") int comment_idx, HttpSession session) {
@@ -114,7 +111,7 @@ public class CommentController {
         return commentLikeCount;
     }
 
-    @ApiOperation(value = "取消点赞帖子评论")
+    // 取消点赞帖子评论
     @ResponseBody
     @PostMapping("/catstagram/account/likeFeedCommentCancel")
     public int likeFeedCommentCancel(@RequestParam("comment_idx") int comment_idx, HttpSession session) {

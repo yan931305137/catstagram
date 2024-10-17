@@ -18,18 +18,16 @@ import com.catstagram.entity.Alarm;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 @Controller
-@Api(tags = "个人资料管理")
 public class ProfileController {
 	
 	@Autowired
 	private MemberService memberService;
 	
-	@ApiOperation(value = "进入个人资料修改页面并加载已保存的个人资料", notes = "根据会话中的sidx加载个人资料")
+	/**
+	 * 进入个人资料修改页面并加载已保存的个人资料
+	 * 根据会话中的sidx加载个人资料
+	 */
 	@GetMapping("/catstagram/account/profileUpdate")
 	public ModelAndView profileUpdateForm(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -78,9 +76,12 @@ public class ProfileController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "修改个人资料", notes = "根据传入的Member对象更新个人资料")
+	/**
+	 * 修改个人资料
+	 * 根据传入的Member对象更新个人资料
+	 */
 	@PostMapping("/catstagram/account/profileUpdate")
-	public String profileUpdate(Model model, @ApiParam(value = "个人资料信息", required = true) Member dto, HttpSession session) {
+	public String profileUpdate(Model model, Member dto, HttpSession session) {
 		int sidx = (Integer)session.getAttribute("sidx");
 		dto.setMember_idx(sidx);
 		int result = 0;
@@ -96,7 +97,10 @@ public class ProfileController {
 		return "msg/msg";
 	}
 	
-	@ApiOperation(value = "打开个人资料图片更改弹出窗口", notes = "根据会话中的sidx打开图片更改窗口")
+	/**
+	 * 打开个人资料图片更改弹出窗口
+	 * 根据会话中的sidx打开图片更改窗口
+	 */
 	@GetMapping("/catstagram/account/profileImgPopup")
 	public ModelAndView profileImgPopup(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -112,9 +116,12 @@ public class ProfileController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "修改个人资料图片", notes = "根据上传的图片文件更新个人资料图片")
+	/**
+	 * 修改个人资料图片
+	 * 根据上传的图片文件更新个人资料图片
+	 */
 	@PostMapping("/catstagram/account/profileImgUpdate")
-	public ModelAndView profileImgUpdate(HttpSession session, @ApiParam(value = "上传的图片文件", required = true) MultipartHttpServletRequest req) {
+	public ModelAndView profileImgUpdate(HttpSession session, MultipartHttpServletRequest req) {
 		MultipartFile upl = req.getFile("member_img");
 		String upload = upl.getOriginalFilename();
 		
@@ -175,7 +182,10 @@ public class ProfileController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "错误的访问", notes = "处理错误的访问请求")
+	/**
+	 * 错误的访问
+	 * 处理错误的访问请求
+	 */
 	@GetMapping("/catstagram/account/profileImgUpdate")
 	public ModelAndView profileImgUpdateGet() {
 		ModelAndView mav = new ModelAndView();

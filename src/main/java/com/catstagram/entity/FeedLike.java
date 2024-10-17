@@ -14,7 +14,7 @@ import lombok.*;
 public class FeedLike implements Serializable {
 	// 点赞的唯一标识符（索引）
 	@TableId
-	private Integer feed_like_idx;
+	private int feed_like_idx;
 	// 动态的唯一标识符（索引）
 	private int feed_idx;
 	// 用户的唯一标识符（索引）

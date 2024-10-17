@@ -19,10 +19,6 @@ import com.catstagram.service.FollowService;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-@Api(tags = "Catstagram管理")
 @Controller
 public class CatstagramController {
 	
@@ -35,7 +31,7 @@ public class CatstagramController {
 	@Autowired
 	private FollowService followService;
 	
-	@ApiOperation(value = "获取Catstagram页面")
+	// 获取Catstagram页面
 	@GetMapping("/catstagram/{member_id}")
 	public ModelAndView catstagram(@PathVariable String member_id, HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");

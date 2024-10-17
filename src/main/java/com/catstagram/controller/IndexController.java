@@ -25,11 +25,6 @@ import com.catstagram.service.FollowService;
 import com.catstagram.entity.Member;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
-@Api(tags = "主页管理")
 @Controller
 public class IndexController {
 
@@ -42,7 +37,10 @@ public class IndexController {
 	@Autowired
 	private FeedService feedService;
 
-	@ApiOperation(value = "进入登录页面", notes = "跳转到登录页面")
+	/**
+	 * 进入登录页面
+	 * 跳转到登录页面
+	 */
 	@GetMapping("/catstagram")
 	public ModelAndView index(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx"); // 从 session 中获取用户的 idx
@@ -118,11 +116,14 @@ public class IndexController {
 		return mav;
 	}
 
-	@ApiOperation(value = "登录功能", notes = "用户登录")
+	/**
+	 * 登录功能
+	 * 用户登录
+	 */
 	@PostMapping("/catstagram/account/login")
-	public ModelAndView login(@ApiParam(value = "用户ID", required = true) @RequestParam("member_id") String id,
-							  @ApiParam(value = "用户密码", required = true) @RequestParam("member_pwd") String pwd,
-							  @ApiParam(value = "保存ID选项", required = false) @RequestParam(value = "saveidChk", required = false) String saveid,
+	public ModelAndView login(@RequestParam("member_id") String id,
+							  @RequestParam("member_pwd") String pwd,
+							  @RequestParam(value = "saveidChk", required = false) String saveid,
 							  HttpServletResponse resp,
 							  HttpSession session) {
 		// 密码加密
@@ -188,7 +189,10 @@ public class IndexController {
 		return mav;
 	}
 
-	@ApiOperation(value = "拒绝 GET 请求的登录行为", notes = "非法访问提示")
+	/**
+	 * 拒绝 GET 请求的登录行为
+	 * 非法访问提示
+	 */
 	@GetMapping("/catstagram/account/login")
 	public ModelAndView loginGetReq(HttpServletRequest req) {
 		ModelAndView mav = new ModelAndView();

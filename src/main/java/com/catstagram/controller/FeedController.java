@@ -24,12 +24,7 @@ import com.catstagram.entity.FeedLike;
 import com.catstagram.service.FeedLikeService;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-
 @Controller
-@Api(tags = "Feed管理")
 public class FeedController {
 	
 	@Autowired
@@ -41,7 +36,6 @@ public class FeedController {
 	@Autowired
 	private MemberService memberService;
 	
-	@ApiOperation(value = "跳转到发布动态页面", notes = "跳转到发布动态页面")
 	@GetMapping("/catstagram/account/feedWrite")
 	public ModelAndView feedWriteForm(HttpSession session) {
 		Integer w_sidx = (Integer)session.getAttribute("sidx");
@@ -82,7 +76,6 @@ public class FeedController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "发布动态", notes = "发布动态")
 	@PostMapping("/catstagram/account/feedWrite")
 	public ModelAndView feedWrite(HttpSession session, MultipartHttpServletRequest req) {
 		MultipartFile upl = req.getFile("feed_img");
@@ -141,9 +134,8 @@ public class FeedController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "跳转到修改动态页面", notes = "跳转到修改动态页面")
 	@GetMapping("/catstagram/account/feedUpdate")
-	public ModelAndView feedUpdateForm(@ApiParam(value = "动态ID", required = true) @RequestParam(value = "feed_idx", defaultValue = "0") int feed_idx, HttpSession session) {
+	public ModelAndView feedUpdateForm(@RequestParam(value = "feed_idx", defaultValue = "0") int feed_idx, HttpSession session) {
 		ModelAndView mav = new ModelAndView();
 		Integer sidx = (Integer)session.getAttribute("sidx");
 		Integer feed_idx_c = (Integer)feed_idx;
@@ -200,9 +192,8 @@ public class FeedController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "修改动态", notes = "修改动态")
 	@PostMapping("/catstagram/account/feedUpdate")
-	public ModelAndView feedUpdate(@ApiParam(value = "动态信息", required = true) Feed dto) {
+	public ModelAndView feedUpdate(Feed dto) {
 		int result = 0;
 		try {
 			result = feedService.feedUpdate(dto);
@@ -219,9 +210,8 @@ public class FeedController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "删除动态", notes = "删除动态")
 	@PostMapping("/catstagram/account/feedDel")
-	public ModelAndView feedDel(@ApiParam(value = "动态ID", required = true) @RequestParam("feed_idx") int feed_idx) {
+	public ModelAndView feedDel(@RequestParam("feed_idx") int feed_idx) {
 		int result = 0;
 		try {
 			result = feedService.feedDel(feed_idx);
@@ -236,7 +226,6 @@ public class FeedController {
 		return mav;
 	}
 
-	@ApiOperation(value = "非法访问删除动态", notes = "非法访问删除动态")
 	@GetMapping("/catstagram/account/feedDel")
 	public ModelAndView feedDelGet() {
 		ModelAndView mav = new ModelAndView();
@@ -247,10 +236,9 @@ public class FeedController {
 		return mav;
 	}
 	
-	@ApiOperation(value = "点赞动态", notes = "点赞动态")
 	@ResponseBody
 	@PostMapping("/catstagram/account/likeFeed")
-	public int likeFeed(@ApiParam(value = "动态ID", required = true) @RequestParam("feed_idx") int feed_idx, HttpSession session) {
+	public int likeFeed(@RequestParam("feed_idx") int feed_idx, HttpSession session) {
 		int sidx = (Integer)session.getAttribute("sidx");
 		FeedLike dto = new FeedLike();
 		dto.setFeed_idx(feed_idx);
@@ -268,10 +256,9 @@ public class FeedController {
 		return feedLikeCount;
 	}
 	
-	@ApiOperation(value = "取消点赞动态", notes = "取消点赞动态")
 	@ResponseBody
 	@PostMapping("/catstagram/account/likeFeedCancel")
-	public int likeFeedCancel(@ApiParam(value = "动态ID", required = true) @RequestParam("feed_idx") int feed_idx, HttpSession session) {
+	public int likeFeedCancel(@RequestParam("feed_idx") int feed_idx, HttpSession session) {
 		int sidx = (Integer)session.getAttribute("sidx");
 		FeedLike dto = new FeedLike();
 		dto.setFeed_idx(feed_idx);

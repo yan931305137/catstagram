@@ -18,10 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.catstagram.entity.Alarm;
 import com.catstagram.service.MemberService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-@Api(tags = "警报管理")
 @Controller
 public class AlarmController {
 	
@@ -29,7 +25,6 @@ public class AlarmController {
 	private MemberService memberService;
 
 	// 将我看到的最后一个警报的时间存储在会话中
-	@ApiOperation(value = "保存最后一个警报时间")
 	@ResponseBody
 	@PostMapping("/catstagram/account/lastAlarmTimeSave")
 	public String lastAlarmTimeSave(@RequestParam("lastAlarmTime") String lastAlarmTime, HttpSession session) {
@@ -52,7 +47,6 @@ public class AlarmController {
 	}
 	
 	// 是否有新的警报
-	@ApiOperation(value = "检查是否有新的警报")
 	@ResponseBody
 	@PostMapping("/catstagram/account/lastAlarmTime")
 	public int lastAlarmTime(@RequestParam("lastAlarmTime") String lastAlarmTime, HttpSession session) {
